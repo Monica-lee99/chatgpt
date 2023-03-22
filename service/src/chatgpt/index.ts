@@ -70,7 +70,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 async function chatReplyProcess(
   message: string,
   lastContext?: { conversationId?: string; parentMessageId?: string },
-  process?: (chat: ChatMessage) => void,
+  chat?: (chat: ChatMessage) => void,
 ) {
   try {
     let options: SendMessageOptions = { timeoutMs }
@@ -85,7 +85,7 @@ async function chatReplyProcess(
     const response = await api.sendMessage(message, {
       ...options,
       onProgress: (partialResponse) => {
-        process?.(partialResponse)
+        chat?.(partialResponse)
       },
     })
 
@@ -94,6 +94,7 @@ async function chatReplyProcess(
   catch (error: any) {
     const code = error.statusCode
     global.console.log(error)
+    global.console.log(`Node version is: ${process.version}`)
     if (Reflect.has(ErrorCodeMessage, code))
       return sendResponse({ type: 'Fail', message: ErrorCodeMessage[code] })
     return sendResponse({ type: 'Fail', message: error.message ?? 'Please check the back-end console' })
